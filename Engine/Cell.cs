@@ -5,10 +5,11 @@ namespace Engine;
 
 public abstract class Cell : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
     private string _text;
     protected string _value;
-    public string Text
+    public virtual string Text
     {
         get { return _text;}
         set
@@ -21,7 +22,12 @@ public abstract class Cell : INotifyPropertyChanged
             
         }
     }
-    
+
+    public override string ToString()
+    {
+        return $"({Row},{Col})[{Text}][{Value}]";
+    }
+
     public string Value
     {
         get { return _value; }
@@ -37,8 +43,7 @@ public abstract class Cell : INotifyPropertyChanged
 
     public int Row { get; }
     public int Col { get;  }
-    public event PropertyChangedEventHandler? PropertyChanged;
-
+    
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
