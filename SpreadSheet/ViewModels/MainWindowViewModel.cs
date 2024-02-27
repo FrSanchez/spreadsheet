@@ -18,11 +18,11 @@ public class MainWindowViewModel : ViewModelBase
     private Random rand = new ();
     public void PerformAction(object msg)
     {
-        for (int i = 0; i < Spreadsheet.Count; i++)
+        for (int i = 0; i < Spreadsheet.Count; i+=3)
         {
             foreach (Cell cell in Spreadsheet[i])
             {
-                var text = String.Format("#{0:x4}", rand.Next(0xFFFF));
+                var text = String.Format("{0:x4}", rand.Next(0xFFFF));
                 cell.Text = $"{text}";
             }
         }
@@ -36,8 +36,11 @@ public class MainWindowViewModel : ViewModelBase
         {
             for (int c = 0; c < 26; c++)
             {
-                var text = String.Format("#{0:x4}", rand.Next(0xFFFF));
-                spreadsheet[r, c] = $"{text}";
+                if (r % 3 == 1 && c % 2 == 0)
+                {
+                    var text = $"={(char)(c + 'A')}{r}";
+                    spreadsheet[r, c] = $"{text}";
+                }
             }
         }
 
