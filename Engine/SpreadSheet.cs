@@ -110,7 +110,7 @@ public class SpreadSheet : INotifyPropertyChanged
         string nextValue = text;
         if (text != cell.Value)
         {
-            if (text[0] == '=')
+            if (text != string.Empty && text.Length > 2 && text[0] == '=')
             {
                 int row;
                 int col = Char.ToUpper(text[1]) - 'A';

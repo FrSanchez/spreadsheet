@@ -15,23 +15,58 @@
             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
        <vm:MainWindowViewModel/>
    </Design.DataContext>
-   
+    
     <DockPanel LastChildFill="True" >
-        <Button 
-            Name="ClickMe" 
-            Content="Click Me" 
-            Margin="12" 
-            Command="{Binding PerformAction}"
-            CommandParameter="From the button"
-            DockPanel.Dock="Top"/>
+        <DockPanel LastChildFill="True" 
+                   DockPanel.Dock="Top">
 
-        <DataGrid Margin="20" 
+            <Button 
+                Name="Demo1Click" 
+                Content="Demo HWS" 
+                Margin="12" 
+                Command="{Binding DoDemoHw}"
+                CommandParameter="From the button 2"
+            />
+
+            <Button 
+                Name="Demo2Click" 
+                Content="Demo Bonus" 
+                Margin="12" 
+                Command="{Binding DoDemoBonus}"
+                CommandParameter="From the button 1"
+                />
+            <TextBox Name="MyText" Margin="12">...</TextBox>
+                
+            
+        </DockPanel>
+        <DataGrid Margin="5" 
                   ItemsSource="{Binding Spreadsheet}"
                   Name="MainGrid"
-                  AutoGenerateColumns="True" IsReadOnly="True" 
+                  AutoGenerateColumns="False" IsReadOnly="False" 
                   GridLinesVisibility="All"
                   HeadersVisibility="All"
+                  RowHeaderWidth="40"
+                  CellPointerPressed="MainGrid_OnCellPointerPressed"
                   BorderThickness="1" BorderBrush="Gray">
+            <DataGrid.Styles>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                </Style>
+                <!-- Add bottom lines to row headers -->
+                <Style Selector="DataGridRowHeader">
+                    <Setter Property="AreSeparatorsVisible" Value="True" />
+                </Style>
+                <!-- Add bottom and right lines to grid cells-->
+                <Style Selector="DataGridCell /template/ ContentPresenter">
+                    <Setter Property="BorderThickness" Value="0,0,1,1" />
+                    <Setter Property="BorderBrush" Value="#33000000" />
+                    <!-- <Setter Property="FontSize" Value="12"></Setter> -->
+                </Style>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Background" Value="Gray"></Setter>
+                </Style>    
+            </DataGrid.Styles>
+
         </DataGrid>
     </DockPanel>
 </Window>
