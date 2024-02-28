@@ -88,7 +88,7 @@ public class MainWindowViewModel : ViewModelBase
             var columns = new List<Cell>(ColumnCount);
             foreach (var columnIndex in Enumerable.Range(0, ColumnCount))
             {
-                columns.Add(_spreadsheet[rowIndex, columnIndex]);
+                columns.Add(_spreadsheet.GetCell(rowIndex, columnIndex));
                 if (rowIndex % 3 == 1 && columnIndex % 2 == 0)
                 {
                     _spreadsheet[rowIndex, columnIndex].Text = $"={(char)(columnIndex + 'A')}{rowIndex}";
