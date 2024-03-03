@@ -43,4 +43,10 @@ public class TreeTest
         lhs.Rigth = new ValueNode(11);
         Assert.That(tree.Solve(), Is.EqualTo(16.5) );
     }
+
+    [Test]
+    public void ParseTest()
+    {
+        tree.Expression = "0.1*0.2";
+    }
 }
