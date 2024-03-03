@@ -99,8 +99,11 @@ public class SpreadSheet : INotifyPropertyChanged
             int row;
             int col = Char.ToUpper(text[1]) - 'A';
             int.TryParse(text.Substring(2), out row);
-            Cell otherCell = GetCell(row - 1, col);
-            cell.UnBind(otherCell);
+            if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
+            {
+                Cell otherCell = GetCell(row - 1, col);
+                cell.UnBind(otherCell);
+            }
         }
     }
 
@@ -115,9 +118,12 @@ public class SpreadSheet : INotifyPropertyChanged
                 int row;
                 int col = Char.ToUpper(text[1]) - 'A';
                 int.TryParse(text.Substring(2), out row);
-                Cell otherCell = GetCell(row - 1, col);
-                nextValue = otherCell.Value;
-                cell.Bind(otherCell);
+                if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
+                {
+                    Cell otherCell = GetCell(row - 1, col);
+                    nextValue = otherCell.Value;
+                    cell.Bind(otherCell);
+                }
             }
             cell.SetValue(nextValue);
         } 
