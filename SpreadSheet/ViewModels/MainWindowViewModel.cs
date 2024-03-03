@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using Avalonia.Controls;
-using Avalonia.Input;
-using SpreadSheet.Models;
 
 namespace SpreadSheet.ViewModels;
 
@@ -40,6 +35,11 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public void SetCellText(int row, int col, string value)
+    {
+        _spreadsheet[row, col].Text = value;
+    }
+    
     private int nextRandom()
     {
         int rndRow = _rand.Next(0, RowCount);
@@ -89,10 +89,6 @@ public class MainWindowViewModel : ViewModelBase
             foreach (var columnIndex in Enumerable.Range(0, ColumnCount))
             {
                 columns.Add(_spreadsheet.GetCell(rowIndex, columnIndex));
-                if (rowIndex % 3 == 1 && columnIndex % 2 == 0)
-                {
-                    _spreadsheet[rowIndex, columnIndex].Text = $"={(char)(columnIndex + 'A')}{rowIndex}";
-                }
             }
 
             Spreadsheet.Add(columns);

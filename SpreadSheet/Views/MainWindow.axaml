@@ -3,8 +3,8 @@
         xmlns:vm="using:SpreadSheet.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:engine="using:Engine"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        xmlns:views="clr-namespace:SpreadSheet.Views"
         x:Class="SpreadSheet.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -39,15 +39,24 @@
                 
             
         </DockPanel>
+        
         <DataGrid Margin="5" 
                   ItemsSource="{Binding Spreadsheet}"
                   Name="MainGrid"
-                  AutoGenerateColumns="False" IsReadOnly="False" 
-                  GridLinesVisibility="All"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="False"
+                  IsReadOnly="False"
                   HeadersVisibility="All"
                   RowHeaderWidth="40"
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="All"
+                  SelectionMode="Extended"
                   CellPointerPressed="MainGrid_OnCellPointerPressed"
+                  PreparingCellForEdit="MainGrid_OnPreparingCellForEdit"
+                  CellEditEnding="MainGrid_OnCellEditEnding"
                   BorderThickness="1" BorderBrush="Gray">
+            
             <DataGrid.Styles>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
@@ -60,13 +69,12 @@
                 <Style Selector="DataGridCell /template/ ContentPresenter">
                     <Setter Property="BorderThickness" Value="0,0,1,1" />
                     <Setter Property="BorderBrush" Value="#33000000" />
-                    <!-- <Setter Property="FontSize" Value="12"></Setter> -->
+                    <Setter Property="IsEnabled" Value="True"></Setter>
                 </Style>
                 <Style Selector="DataGridRow">
-                    <Setter Property="Background" Value="Gray"></Setter>
+                    <Setter Property="Background" Value="Gray"/>
                 </Style>    
             </DataGrid.Styles>
-
         </DataGrid>
     </DockPanel>
 </Window>
