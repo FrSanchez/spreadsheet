@@ -33,7 +33,7 @@ public class OperatorsTest : IVariableSolver
 
     private static IEnumerable<ClassifierData> ClassifierTestData()
     {
-        yield return new ClassifierData( "+", typeof(AddOperatorNode) );
+        yield return new ClassifierData( "+", typeof(AdditionOperatorNode) );
         yield return new ClassifierData( "-", typeof(SubtractOperatorNode) );
         yield return new ClassifierData( "/", typeof(DivisionOperatorNode) );
         yield return new ClassifierData( "*", typeof(MultiplyOperatorNode) );

@@ -9,6 +9,6 @@ public abstract class OperatorNode : Node
 
     public override double GetValue()
     {
-        throw new EvaluateException("A binary operator needs to values");
+        throw new EvaluateException("A binary operator needs two values");
     }
 }

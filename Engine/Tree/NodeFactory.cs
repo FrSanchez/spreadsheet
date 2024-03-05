@@ -4,38 +4,40 @@ namespace Engine.Tree;
 
 public class NodeFactory(IVariableSolver solver)
 {
-    private readonly IVariableSolver _solver = solver;
-    private readonly Dictionary<char, Type> _nodes = new()
-    {
-        { '+', typeof(AddOperatorNode) },
-        { '-', typeof(SubtractOperatorNode) },
-        { '*', typeof(MultiplyOperatorNode) },
-        { '/', typeof(DivisionOperatorNode) },
-    };
+    
+    // private readonly Dictionary<char, Type> _nodes = new()
+    // {
+    //     { '+', typeof(AddOperatorNode) },
+    //     { '-', typeof(SubtractOperatorNode) },
+    //     { '*', typeof(MultiplyOperatorNode) },
+    //     { '/', typeof(DivisionOperatorNode) },
+    //     { '^', typeof(ExponentOperatorNode) },
+    // };
 
     public Node? CreateNode(string contents)
     {
         if (!string.IsNullOrEmpty(contents))
         {
             var operation = contents[0];
-            if (_nodes.ContainsKey(operation))
+            if (contents.Length == 1 && Symbols.Contains(operation))
             {
-                return (OperatorNode)Activator.CreateInstance(_nodes[operation])!;
+                switch (operation)
+                {
+                    case '+': return new AdditionOperatorNode();
+                    case '-': return new SubtractOperatorNode();
+                    case '*': return new MultiplyOperatorNode();
+                    case '/': return new DivisionOperatorNode();
+                    case '^': return new ExponentOperatorNode();
+                }
             }
         }
 
-        double value;
-        if (double.TryParse(contents, out value))
+        if (double.TryParse(contents, out var number))
         {
-            return new NumberNode(value);
+            return new NumberNode(number);
         }
 
-        var match = Regex.Match(contents, "^[a-zA-Z]+[a-zA-Z0-9]*");
-        if (match.Success)
-        {
-            return new VariableNode(contents, _solver);
-        }
-
-        return null;
+        var match = Regex.Match(contents, "^[a-zA-Z]+[a-zA-Z0-9]*$");
+        return match.Success ? new VariableNode(contents, solver) : null;
     }
 }
