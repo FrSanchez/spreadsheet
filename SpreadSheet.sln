@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTest", "EngineTest\EngineTest.csproj", "{639C3C08-23D7-4D39-BDDC-5D7C1B45669B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionDemo", "ExpressionDemo\ExpressionDemo.csproj", "{00771A1C-8D30-44BF-9862-40672981D76D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{639C3C08-23D7-4D39-BDDC-5D7C1B45669B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{639C3C08-23D7-4D39-BDDC-5D7C1B45669B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{639C3C08-23D7-4D39-BDDC-5D7C1B45669B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00771A1C-8D30-44BF-9862-40672981D76D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00771A1C-8D30-44BF-9862-40672981D76D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00771A1C-8D30-44BF-9862-40672981D76D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00771A1C-8D30-44BF-9862-40672981D76D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
