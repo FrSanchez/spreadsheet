@@ -1,52 +1,62 @@
+using System.Diagnostics;
 using Engine;
+using Engine.Tree;
 
 namespace EngineTest;
 
-public class TreeTest
+public class TreeTest : IVariableSolver
 {
-    private ExpressionTree tree;
+    private ExpressionTree _tree;
+    private readonly NodeFactory _factory;
+
+    public TreeTest()
+    {
+        _factory = new NodeFactory(this);
+    }
+
     [SetUp]
     public void Setup()
     {
-        tree = new();
+        _tree = new ExpressionTree("");
     }
 
     [Test]
     public void SolveSingleNum()
     {
-        tree.Root = new ValueNode(10);
-        Assert.That(tree.Solve(), Is.EqualTo(10.0));
+        _tree.Root = new NumberNode(10);
+        Assert.That(_tree.Solve(), Is.EqualTo(10.0));
     }
     
     [Test]
     public void SolveOneLevel()
     {
         // 10 + 20
-        OpNode root = new OpNode('+');
-        ValueNode lhs = new ValueNode(10);
-        ValueNode rhs = new ValueNode(20);
+        OperatorNode? root = _factory.CreateNode("+") as OperatorNode;
+        if (root == null) throw new ArgumentNullException(nameof(root));
+        NumberNode lhs = new NumberNode(10);
+        NumberNode rhs = new NumberNode(20);
         root.Left = lhs;
-        root.Rigth = rhs;
-        tree.Root = root;
-        Assert.That(tree.Solve(), Is.EqualTo(30));
+        root.Right = rhs;
+        _tree.Root = root;
+        Assert.That(_tree.Solve(), Is.EqualTo(30));
     }
 
     [Test]
     public void SolveTwoLevels()
     {
         // (11 + 22) * 0.5
-        tree.Root = new OpNode('*');
-        tree.Root.Left = new OpNode('+');
-        tree.Root.Rigth = new ValueNode(0.5f);
-        var lhs = tree.Root.Left;
-        lhs.Left = new ValueNode(22);
-        lhs.Rigth = new ValueNode(11);
-        Assert.That(tree.Solve(), Is.EqualTo(16.5) );
+        _tree.Root = _factory.CreateNode("*");
+        (((OperatorNode)_tree.Root!)!).Left = (OperatorNode)_factory.CreateNode("+")!;
+        ((OperatorNode)_tree.Root).Right = new NumberNode(0.5f);
+        var lhs = ((OperatorNode)_tree.Root).Left as OperatorNode;
+        Debug.Assert(lhs != null, nameof(lhs) + " != null");
+        lhs.Left = new NumberNode(22);
+        lhs.Right = new NumberNode(11);
+        Assert.That(_tree.Solve(), Is.EqualTo(16.5) );
     }
-
-    [Test]
-    public void ParseTest()
+    
+    public double Resolve(string variable)
     {
-        tree.Expression = "0.1*0.2";
+        throw new NotImplementedException();
     }
 }

@@ -1,33 +1,37 @@
+using Engine.Tree;
+
 namespace Engine;
 
-public class ExpressionTree
+public class ExpressionTree 
 {
-    private string _expression;
+    private readonly string _expression;
+    private readonly Parser _parser;
     public Node? Root { get; set; }
     public string Expression
     {
-        get { return _expression; }
-        set
-        {
-            _expression = value;
-            Parse();
-        }
+        get => _expression;
     }
 
     private static readonly char[] Symbols = new[] { '+', '-', '*', '/' };
+    private readonly VariableSolver _solver;
+
     private void Parse()
     {
-        string [] parts = _expression.Split(ExpressionTree.Symbols);
-        foreach(string part in parts)
-        {
-            Console.WriteLine(part);
-        }
+        Root = _parser.Parse(_expression);
     }
 
-    public ExpressionTree()
+    public ExpressionTree(string expression)
     {
+        _solver = new VariableSolver();
+        _expression = expression;
         Root = null;
-        Expression = string.Empty;
+        _parser = new Parser(_solver);
+        Parse();
+    }
+
+    public void AddVariable(string variable, double value)
+    {
+        _solver.AddVariable(variable, value);
     }
 
     public double Solve()
