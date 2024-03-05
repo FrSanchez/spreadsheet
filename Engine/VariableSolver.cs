@@ -23,4 +23,9 @@ public class VariableSolver : IVariableSolver
     {
         return _variables.GetValueOrDefault(variable, 0);
     }
+
+    public IEnumerable<string> GetVariableNames()
+    {
+        return _variables.Keys;
+    }
 }

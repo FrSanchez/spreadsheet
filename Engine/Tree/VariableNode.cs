@@ -1,9 +1,15 @@
 namespace Engine.Tree;
 
-public class VariableNode(string variable, IVariableSolver solver) : Node, ILeafNode
+public class VariableNode : Node, ILeafNode
 {
-    private readonly string _variable = variable;
-    private readonly IVariableSolver _solver = solver;
+    private readonly string _variable;
+    private readonly IVariableSolver _solver;
+    
+    public VariableNode(string variable, IVariableSolver solver) 
+    {
+        _variable = variable;
+        _solver = solver;
+    }
 
     public override double GetValue()
     {

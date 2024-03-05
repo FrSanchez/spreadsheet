@@ -5,18 +5,24 @@ namespace EngineTest;
 
 public class OperatorsTest : IVariableSolver
 {
-    public class ClassifierData(string op, Type type)
+    public class ClassifierData
     {
-        public string Op { get;  } = op;
-        public Type? Type { get;  } = type;
+        public ClassifierData(string op, Type type)
+        {
+            Op = op;
+            Type = type;
+        }
+        public string Op { get;  }
+        public Type? Type { get;  }
     }
+    
     [SetUp]
     public void Setup()
     {
         
     }
 
-    [Test, TestCaseSource("ClassifierTestData")]
+    [Test, TestCaseSource(nameof(ClassifierTestData))]
     public void ClassifyAddTest(ClassifierData data)
     {
         var classifier = new NodeFactory(this);

@@ -34,6 +34,16 @@ public class ExpressionTree
         _solver.AddVariable(variable, value);
     }
 
+    public double GetVariable(string variable)
+    {
+        return _solver.GetVariable(variable);
+    }
+
+    public IEnumerable<string> GetVariableNames()
+    {
+        return _solver.GetVariableNames();
+    }
+
     public double Solve()
     {
         if (Root == null)

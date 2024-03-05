@@ -2,9 +2,14 @@ using System.Text.RegularExpressions;
 
 namespace Engine.Tree;
 
-public class NodeFactory(IVariableSolver solver)
+public class NodeFactory
 {
-    
+    private readonly IVariableSolver _solver;
+
+    public NodeFactory(IVariableSolver solver)
+    {
+        _solver = solver;
+    }
     // private readonly Dictionary<char, Type> _nodes = new()
     // {
     //     { '+', typeof(AddOperatorNode) },
@@ -38,6 +43,6 @@ public class NodeFactory(IVariableSolver solver)
         }
 
         var match = Regex.Match(contents, "^[a-zA-Z]+[a-zA-Z0-9]*$");
-        return match.Success ? new VariableNode(contents, solver) : null;
+        return match.Success ? new VariableNode(contents, _solver) : null;
     }
 }

@@ -4,10 +4,15 @@ using Engine.Tree;
 
 namespace Engine;
 
-public class Parser(IVariableSolver solver)
+public class Parser
 {
-    private readonly NodeFactory _nodeFactory = new (solver);
+    private readonly NodeFactory _nodeFactory;
 
+    public Parser(IVariableSolver solver)
+    {
+        _nodeFactory = new (solver);
+    }
+    
     public Node? Parse(string expression)
     {
         var root = _nodeFactory.CreateNode(expression);
