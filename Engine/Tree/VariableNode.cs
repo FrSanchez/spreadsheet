@@ -2,10 +2,10 @@ namespace Engine.Tree;
 
 public class VariableNode : Node, ILeafNode
 {
-    private readonly string _variable;
+    private readonly string? _variable;
     private readonly IVariableSolver _solver;
     
-    public VariableNode(string variable, IVariableSolver solver) 
+    public VariableNode(string? variable, IVariableSolver solver) 
     {
         _variable = variable;
         _solver = solver;

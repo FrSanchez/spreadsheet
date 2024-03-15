@@ -7,15 +7,38 @@ namespace Engine;
 public class Parser
 {
     private readonly NodeFactory _nodeFactory;
+    private readonly ShuntingYard _sy;
 
     public Parser(IVariableSolver solver)
     {
         _nodeFactory = new (solver);
+        _sy = new ShuntingYard(solver);
+    }
+
+    public Node? ParseWithShuntingYard(string expression)
+    {
+        var nodes = _sy.ConvertToPostfix(expression.Trim());
+        var stack = new Stack<Node>();
+        foreach (var node in nodes)
+        {
+            if (node is NumberNode || node is VariableNode)
+            {
+                stack.Push(node);
+            }
+            else
+            {
+                ((OperatorNode)node).Right = stack.Pop();
+                ((OperatorNode)node).Left = stack.Pop();
+                stack.Push(node);
+            }
+        }
+
+        return stack.Pop();
     }
     
     public Node? Parse(string expression)
     {
-        var root = _nodeFactory.CreateNode(expression);
+        var root = _nodeFactory.CreateNode(expression.Trim());
         if (root != null) return root;
         
         foreach (var symbol in Symbols.Valid)
@@ -24,8 +47,8 @@ public class Parser
             if (idx == -1) continue;
                 
             root = _nodeFactory.CreateNode(symbol.ToString());
-            ((OperatorNode)root!).Left = Parse(expression.Remove(idx));
-            ((OperatorNode)root).Right = Parse(expression[(idx + 1)..]);
+            ((OperatorNode)root!).Left = Parse(expression.Remove(idx).Trim());
+            ((OperatorNode)root).Right = Parse(expression[(idx + 1)..].Trim());
             return root;
         }
 

@@ -6,18 +6,13 @@ public class ExpressionTree
 {
     private readonly string _expression;
     private readonly Parser _parser;
-    public Node? Root { get; set; }
-    public string Expression
-    {
-        get => _expression;
-    }
+    private Node? Root { get; set; }
 
-    private static readonly char[] Symbols = new[] { '+', '-', '*', '/' };
     private readonly VariableSolver _solver;
 
     private void Parse()
     {
-        Root = _parser.Parse(_expression);
+        Root = _parser.ParseWithShuntingYard(_expression);
     }
 
     public ExpressionTree(string expression)
@@ -29,17 +24,17 @@ public class ExpressionTree
         Parse();
     }
 
-    public void AddVariable(string variable, double value)
+    public void AddVariable(string? variable, double value)
     {
         _solver.AddVariable(variable, value);
     }
 
-    public double GetVariable(string variable)
+    public double GetVariable(string? variable)
     {
         return _solver.GetVariable(variable);
     }
 
-    public IEnumerable<string> GetVariableNames()
+    public IEnumerable<string?> GetVariableNames()
     {
         return _solver.GetVariableNames();
     }

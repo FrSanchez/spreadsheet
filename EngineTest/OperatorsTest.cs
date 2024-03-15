@@ -7,12 +7,12 @@ public class OperatorsTest : IVariableSolver
 {
     public class ClassifierData
     {
-        public ClassifierData(string op, Type type)
+        public ClassifierData(string? op, Type type)
         {
             Op = op;
             Type = type;
         }
-        public string Op { get;  }
+        public string? Op { get;  }
         public Type? Type { get;  }
     }
     
@@ -45,7 +45,7 @@ public class OperatorsTest : IVariableSolver
         yield return new ClassifierData( "*", typeof(MultiplyOperatorNode) );
     }
 
-    public double Resolve(string variable)
+    public double Resolve(string? variable)
     {
         throw new NotImplementedException();
     }

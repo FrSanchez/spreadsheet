@@ -19,7 +19,7 @@ public class NodeFactory
     //     { '^', typeof(ExponentOperatorNode) },
     // };
 
-    public Node? CreateNode(string contents)
+    public Node? CreateNode(string? contents)
     {
         if (!string.IsNullOrEmpty(contents))
         {

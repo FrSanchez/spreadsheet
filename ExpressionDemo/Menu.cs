@@ -89,12 +89,11 @@ public class Menu
 
     private void Build()
     {
-        int cnt = 0;
-        _entries.Add(new MenuEntry() { Index = cnt++, Name = "New Expression", Function = NewExpression });
-        _entries.Add(new MenuEntry() { Index = cnt++, Name = "Add Variable", Function = AddVariable });
-        _entries.Add(new MenuEntry() { Index = cnt++, Name = "List Variables", Function = ListVariables });
-        _entries.Add(new MenuEntry() { Index = cnt++, Name = "Solve", Function = Solve });
-        _entries.Add(new MenuEntry() { Index = cnt++, Name = "Quit", Function = Quit });
+        _entries.Add(new MenuEntry() { Name = "New Expression", Function = NewExpression });
+        _entries.Add(new MenuEntry() { Name = "Add Variable", Function = AddVariable });
+        _entries.Add(new MenuEntry() { Name = "List Variables", Function = ListVariables });
+        _entries.Add(new MenuEntry() { Name = "Solve", Function = Solve });
+        _entries.Add(new MenuEntry() { Name = "Quit", Function = Quit });
     }
     
     public void Show()
@@ -104,17 +103,19 @@ public class Menu
         {
             Console.WriteLine($"Expression: {_expression}");
         }
+
+        int cnt = 1;
         foreach (var entry in _entries)
         {
-            Console.WriteLine($"{entry.Index + 1}: {entry.Name}");
+            Console.WriteLine($"{cnt++}: {entry.Name}");
         }
+        Console.WriteLine("");
     }
 
     public bool Action()
     {
         var line = Console.ReadLine();
-        int input;
-        if (int.TryParse(line, out input))
+        if (int.TryParse(line, out var input))
         {
             if (input > 0 && input <= _entries.Count)
             {

@@ -7,7 +7,7 @@ namespace EngineTest;
 public class ParserTest : IVariableSolver
 {
     private Parser _parser;
-    private readonly Dictionary<string, double> _vars = new Dictionary<string, double>();
+    private readonly Dictionary<string?, double> _vars = new Dictionary<string?, double>();
     
     [SetUp]
     public void Setup()
@@ -112,6 +112,22 @@ public class ParserTest : IVariableSolver
         Assert.That(root, Is.Not.Null);
         Assert.That(root.GetValue(), Is.EqualTo(3 * 5 - 9 * 8));
     }
+    
+    [Test]
+    public void ParseSingleWithOrderSY()
+    {
+        var root = _parser.ParseWithShuntingYard(" 3 * 5 - 9 * 2 ^ 3");
+        Assert.That(root, Is.Not.Null);
+        Assert.That(root.GetValue(), Is.EqualTo(3 * 5 - 9 * 8));
+    }
+
+    [Test]
+    public void ParseWithParentheses()
+    {
+        var root = _parser.ParseWithShuntingYard("(( 3 + 5) * ( 10 - 8)) ^2");
+        Assert.That(root, Is.Not.Null);
+        Assert.That(root.GetValue(), Is.EqualTo(Math.Pow(( 3 + 5) * ( 10 - 8), 2)));
+    }
 
     [Test]
     public void ParseSingleMultDiv()
@@ -129,7 +145,7 @@ public class ParserTest : IVariableSolver
         Assert.That(root.GetValue(), Is.EqualTo(4 * 3 / 2));
     }
 
-    public double Resolve(string variable)
+    public double Resolve(string? variable)
     {
         return _vars[variable];
     }
