@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Engine;
 
-internal class SpreadSheetCell : Cell
+internal sealed class SpreadSheetCell : Cell
 {
     
     public event PropertyChangingEventHandler? PropertyChanging = delegate { };
@@ -13,7 +13,7 @@ internal class SpreadSheetCell : Cell
         
     }
 
-    public SpreadSheetCell(int row, int col, string value) : base(row, col)
+    private SpreadSheetCell(int row, int col, string value) : base(row, col)
     {
         Text = value;
         SetValue(value);
@@ -24,7 +24,7 @@ internal class SpreadSheetCell : Cell
         if (value != _value)
         {
             _value = value;
-            OnPropertyChanged("Value");
+            OnPropertyChanged(nameof(Value));
         }
     }
 
@@ -42,11 +42,11 @@ internal class SpreadSheetCell : Cell
     {
         if (args.PropertyName == "Value")
         {
-            OnPropertyChanged("Text");
+            OnPropertyChanged(nameof(Text));
         }
     }
 
-    public override string Text
+    public sealed override string Text
     {
         get => base.Text;
         set
@@ -55,8 +55,8 @@ internal class SpreadSheetCell : Cell
             base.Text = value;
         }
     }
-    
-    protected virtual void OnPropertyChanging([CallerMemberName] string? propertyName = null)
+
+    private void OnPropertyChanging([CallerMemberName] string? propertyName = null)
     {
         PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
     }

@@ -51,11 +51,11 @@ public partial class ShuntingYard(IVariableSolver solver)
                 }
                 default:
                 {
-                    if (_precedence.ContainsKey(token[0]))
+                    if (_precedence.TryGetValue(token[0], out var op))
                     {
                         // Operator: Handle precedence
                         while (operatorStack.Count > 0 && _precedence.ContainsKey(operatorStack.Peek()![0]) &&
-                               _precedence[operatorStack.Peek()![0]] >= _precedence[token[0]])
+                               _precedence[operatorStack.Peek()![0]] >= op)
                         {
                             var opNode = _factory.CreateNode(operatorStack.Pop());
                             if (opNode != null) outputQueue.Add(opNode);

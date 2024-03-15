@@ -1,19 +1,11 @@
-using System.Data;
-using System.Text.RegularExpressions;
 using Engine.Tree;
 
 namespace Engine;
 
-public class Parser
+public class Parser(IVariableSolver solver)
 {
-    private readonly NodeFactory _nodeFactory;
-    private readonly ShuntingYard _sy;
-
-    public Parser(IVariableSolver solver)
-    {
-        _nodeFactory = new (solver);
-        _sy = new ShuntingYard(solver);
-    }
+    private readonly NodeFactory _nodeFactory = new (solver);
+    private readonly ShuntingYard _sy = new(solver);
 
     public Node? ParseWithShuntingYard(string expression)
     {

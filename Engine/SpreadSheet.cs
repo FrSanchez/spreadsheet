@@ -6,9 +6,9 @@ public class SpreadSheet : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    private int _rowCount;
-    private int _colCount;
-    private List<List<SpreadSheetCell>>_cells;
+    private readonly int _rowCount;
+    private readonly int _colCount;
+    private readonly List<List<SpreadSheetCell>>_cells;
     
     public SpreadSheet(int rowCount, int colCount)
     {
@@ -31,16 +31,16 @@ public class SpreadSheet : INotifyPropertyChanged
     {
         if (row < 0 || row >= _rowCount)
         {
-            throw new ArgumentOutOfRangeException("row");
+            throw new ArgumentOutOfRangeException(nameof(row));
         }
 
         if (col < 0 || col >= _colCount)
         {
-            throw new ArgumentOutOfRangeException("col");
+            throw new ArgumentOutOfRangeException(nameof(col));
         }
     }
 
-    public IEnumerable<Cell> GetRow(int row)
+    private IEnumerable<Cell> GetRow(int row)
     {
         return _cells[row];
     }
@@ -62,18 +62,9 @@ public class SpreadSheet : INotifyPropertyChanged
         return _cells;
     }
 
-    public IEnumerable<Cell> this[int row]
-    {
-        get { return GetRow(row); }
-    }
+    public IEnumerable<Cell> this[int row] => GetRow(row);
 
-    public Cell this[int row, int col]
-    {
-        get
-        {
-            return GetCell(row, col);
-        }
-    } 
+    public Cell this[int row, int col] => GetCell(row, col);
 
     private void InitializeData()
     {
@@ -93,55 +84,50 @@ public class SpreadSheet : INotifyPropertyChanged
 
     private void PreUpdateValue(SpreadSheetCell cell)
     {
-        string text = cell.Text;
-        if (text.Length > 2 && text[0] == '=')
-        {
-            int row;
-            int col = Char.ToUpper(text[1]) - 'A';
-            int.TryParse(text.Substring(2), out row);
-            if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
-            {
-                Cell otherCell = GetCell(row - 1, col);
-                cell.UnBind(otherCell);
-            }
-        }
+        var text = cell.Text;
+        if (text.Length <= 2 || text[0] != '=') return;
+        var col = char.ToUpper(text[1]) - 'A';
+        if (!int.TryParse(text.AsSpan(2), out var row)) return;
+        if (row <= 0 || row >= _rowCount || col < 0 || col >= _colCount) return;
+        var otherCell = GetCell(row - 1, col);
+        cell.UnBind(otherCell);
     }
 
     private void UpdateValue(SpreadSheetCell cell)
     {
-        string text = cell.Text;
-        string nextValue = text;
-        if (text != cell.Value)
+        var text = cell.Text;
+        var nextValue = text;
+        if (text == cell.Value) return;
+        if (text != string.Empty && text.Length > 2 && text[0] == '=')
         {
-            if (text != string.Empty && text.Length > 2 && text[0] == '=')
+            var col = char.ToUpper(text[1]) - 'A';
+            if (!int.TryParse(text[2..], out var row))
             {
-                int row;
-                int col = Char.ToUpper(text[1]) - 'A';
-                int.TryParse(text.Substring(2), out row);
-                if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
-                {
-                    Cell otherCell = GetCell(row - 1, col);
-                    nextValue = otherCell.Value;
-                    cell.Bind(otherCell);
-                }
+                return; 
             }
-            cell.SetValue(nextValue);
-        } 
+            if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
+            {
+                var otherCell = GetCell(row - 1, col);
+                nextValue = otherCell.Value;
+                cell.Bind(otherCell);
+            }
+        }
+        cell.SetValue(nextValue);
     }
     private void OnCellChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (sender != null && sender is SpreadSheetCell && args.PropertyName == "Text")
+        if (sender is SpreadSheetCell cell && args.PropertyName == "Text")
         {
-            UpdateValue((SpreadSheetCell)sender);
+            UpdateValue(cell);
         }
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(""));
     }
 
     private void OnCellChanging(object? sender, PropertyChangingEventArgs args)
     {
-        if (sender != null && sender is SpreadSheetCell && args.PropertyName == "Text")
+        if (sender is SpreadSheetCell cell && args.PropertyName == "Text")
         {
-            PreUpdateValue((SpreadSheetCell)sender);
+            PreUpdateValue(cell);
         }
     }
 }

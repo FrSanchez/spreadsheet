@@ -3,23 +3,21 @@ using System.Runtime.CompilerServices;
 
 namespace Engine;
 
-public abstract class Cell : INotifyPropertyChanged
+public abstract class Cell(int row, int col) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-    private string _text;
-    protected string _value;
+    private string _text = "";
+    protected string _value = "";
     public virtual string Text
     {
-        get { return _text;}
+        get => _text;
         set
         {
-            if (!_text.Equals(value))
-            {
-                _text = value;
-                OnPropertyChanged();
-            }
-            
+            if (_text.Equals(value)) return;
+            _text = value;
+            OnPropertyChanged();
+
         }
     }
 
@@ -28,22 +26,11 @@ public abstract class Cell : INotifyPropertyChanged
         return $"({Row},{Col})[{Text}][{Value}]";
     }
 
-    public string Value
-    {
-        get { return _value; }
-    }
+    public string Value => _value;
 
-    protected Cell(int row, int col)
-    {
-        Row = row;
-        Col = col;
-        _text = "";
-        _value = "";
-    }
+    private int Row { get; } = row;
+    private int Col { get;  } = col;
 
-    public int Row { get; }
-    public int Col { get;  }
-    
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
