@@ -125,22 +125,16 @@ public class SpreadSheet : INotifyPropertyChanged
             foreach(var name in expression.GetVariableNames())
             {
                 if (name == null) continue;
-                var location = GetLocation(name);
-                if (location != null)
+                expression.AddVariable(name, null);
+                var loc = GetLocation(name);
+                if (loc == null) continue;
+                
+                if (loc.Row < 0 || loc.Row > _rowCount || loc.Col < 0 || loc.Col > _colCount) continue;
+                var otherCell = GetCell(loc.Row, loc.Col);
+                cell.Bind(otherCell);
+                if (double.TryParse(otherCell.Value, out var cellValue))
                 {
-                    var row = location.Row;
-                    var col = location.Col;
-                    if (row < 0 || row > _rowCount || col < 0 || col > _colCount) continue;
-                    var otherCell = GetCell(row, col);
-                    cell.Bind(otherCell);
-                    if (double.TryParse(otherCell.Value, out var cellValue))
-                    {
-                        expression.AddVariable(name, cellValue);
-                    }
-                    else
-                    {
-                        expression.AddVariable(name, null);
-                    }
+                    expression.AddVariable(name, cellValue);
                 }
             }
 
