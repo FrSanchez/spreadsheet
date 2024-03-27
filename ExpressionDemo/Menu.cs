@@ -57,7 +57,7 @@ public class Menu
             var output = new List<string>();
             foreach (var variable in _tree.GetVariableNames())
             {
-                double value = _tree.GetVariable(variable);
+                var value = _tree.GetVariable(variable);
                 output.Add($"{variable}={value}");
             }
             Console.WriteLine(string.Join(',', output));

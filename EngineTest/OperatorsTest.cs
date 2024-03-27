@@ -45,8 +45,13 @@ public class OperatorsTest : IVariableSolver
         yield return new ClassifierData( "*", typeof(MultiplyOperatorNode) );
     }
 
-    public double Resolve(string? variable)
+    public double? Resolve(string? variable)
     {
         throw new NotImplementedException();
+    }
+
+    public void AddVariable(string variable)
+    { 
+        
     }
 }

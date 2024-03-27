@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Engine;
-using SpreadSheet.Models;
 using SpreadSheet.ViewModels;
 
 namespace SpreadSheet.Views;
@@ -18,12 +15,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         InitializeComponent();
         
         MainGrid.Columns.Clear();
-        for (char c = 'A'; c <= 'Z'; c++)
+        for (var c = 'A'; c <= 'Z'; c++)
         {
-            var col = new DataGridTextColumn();
-            col.IsReadOnly = false;
-            col.Header = c.ToString();
-            col.Binding = new Binding($"[{c - 'A'}].Value");
+            var col = new DataGridTextColumn
+            {
+                IsReadOnly = false,
+                Header = c.ToString(),
+                Binding = new Binding($"[{c - 'A'}].Value")
+            };
             MainGrid.Columns.Add(col);
         }
 
@@ -44,9 +43,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         int row = e.Row.GetIndex();
         if (e.Column != null)
         {
-            int col = e.Column.Header.ToString()[0] - 'A';
+            var col = e.Column.Header.ToString()![0] - 'A';
             var cells = (List<List<Cell>>)dg.ItemsSource;
-            if (row < vm.Spreadsheet.Count && col < vm.Spreadsheet[0].Count)
+            if (vm != null && row < vm.Spreadsheet.Count && col < vm.Spreadsheet[0].Count)
             {
                 var cell = cells[row][col];
                 MyText.Text = $"[{e.Column.Header}{row + 1}] : {cell.Text}";
@@ -62,9 +61,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         int row = e.Row.GetIndex();
         if (e.Column != null)
         {
-            int col = e.Column.Header.ToString()[0] - 'A';
+            var col = e.Column.Header.ToString()![0] - 'A';
             var cells = (List<List<Cell>>)dg.ItemsSource;
-            if (row < vm.Spreadsheet.Count && col < vm.Spreadsheet[0].Count)
+            if (vm != null && row < vm.Spreadsheet.Count && col < vm.Spreadsheet[0].Count)
             {
                 var cell = cells[row][col];
                 block.Text = cell.Text;
@@ -72,15 +71,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         }
     }
 
-    private void MainGrid_OnCellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
+    private void MainGrid_OnCellEditEnding(object? _, DataGridCellEditEndingEventArgs e)
     {
         var vm = ViewModel;
         var block = (TextBox)e.EditingElement;
-        var dg = (DataGrid)sender!;
-        int row = e.Row.GetIndex();
+        var row = e.Row.GetIndex();
         if (vm != null && e.Column != null && block.Text != null)
         {
-            int? col = e.Column?.Header?.ToString()[0] - 'A';
+            var col = e.Column?.Header?.ToString()?[0] - 'A';
             if (col.HasValue && row < vm.Spreadsheet.Count && col < vm.Spreadsheet[0].Count)
             {
                 vm.SetCellText(row,col.Value,block.Text);

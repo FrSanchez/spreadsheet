@@ -74,7 +74,8 @@ public class ParserTest : IVariableSolver
         _vars.Add("d", 21.0);
         var root = _parser.Parse("a + b - c -d / 2");
         Assert.That(root, Is.Not.Null);
-        Assert.That(root.GetValue(), Is.EqualTo(2.25 + 3.3 - 1.5 - 21.0 / 2));
+        double delta = Math.Abs(root!.GetValue() - (2.25 + 3.3 - 1.5 - 21.0 / 2));
+        Assert.That(delta, Is.LessThanOrEqualTo(0.00000001f));
     }
 
     [Test]
@@ -145,8 +146,13 @@ public class ParserTest : IVariableSolver
         Assert.That(root.GetValue(), Is.EqualTo(4 * 3 / 2));
     }
 
-    public double Resolve(string? variable)
+    public double? Resolve(string? variable)
     {
         return _vars[variable];
+    }
+
+    public void AddVariable(string variable)
+    {
+        
     }
 }

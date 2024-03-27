@@ -64,11 +64,14 @@ public class SpreadSheetTest
         var ss = new SpreadSheet(2, 2);
         ss.SetCell(0,0, "hello");
         ss.SetCell(0,1,"=A1");
-        Assert.That(ss.GetCell(0,1).Text, Is.EqualTo("=A1"));
-        Assert.That(ss.GetCell(0,1).Value, Is.EqualTo("hello"));
-        Assert.That(ss.GetCell(0,0).Value, Is.EqualTo("hello"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(ss.GetCell(0, 1).Text, Is.EqualTo("=A1"));
+            Assert.That(ss.GetCell(0, 1).Value, Is.EqualTo("hello"));
+            Assert.That(ss.GetCell(0, 0).Value, Is.EqualTo("hello"));
+        });
     }
-    
+
     [Test]
     public void TestFormulaBasic2()
     {

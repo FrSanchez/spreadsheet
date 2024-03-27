@@ -1,23 +1,22 @@
+using System.Data;
+using Engine.Exceptions;
+
 namespace Engine.Tree;
 
-public class VariableNode : Node, ILeafNode
+public class VariableNode(string? variable, IVariableSolver solver) : Node, ILeafNode
 {
-    private readonly string? _variable;
-    private readonly IVariableSolver _solver;
-    
-    public VariableNode(string? variable, IVariableSolver solver) 
-    {
-        _variable = variable;
-        _solver = solver;
-    }
-
     public override double GetValue()
     {
-        return _solver.Resolve(_variable);
+        var value = solver.Resolve(variable);
+        if (null == value)
+        {
+            throw new InvalidVariableException("A null value is not permitted");
+        }
+        return (double)value;
     }
 
     public override string ToString()
     {
-        return $"var:{_variable}";
+        return $"var:{variable}";
     }
 }

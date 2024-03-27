@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Engine;
 
@@ -93,23 +94,64 @@ public class SpreadSheet : INotifyPropertyChanged
         cell.UnBind(otherCell);
     }
 
+    private static Pair? GetLocation(string variable)
+    {
+        if (string.IsNullOrEmpty(variable) || variable.Length < 2)
+        {
+            return null;
+        }
+
+        var col = char.ToUpper(variable[0]) - 'A';
+        if (int.TryParse(variable[1..], out var row))
+        {
+            var rc = new Pair()
+            {
+                Col = col,
+                Row = row - 1,
+            };
+            return rc;
+        }
+        return null;
+    }
+
     private void UpdateValue(SpreadSheetCell cell)
     {
         var text = cell.Text;
         var nextValue = text;
         if (text == cell.Value) return;
-        if (text != string.Empty && text.Length > 2 && text[0] == '=')
+        if (text != string.Empty && text.Length >= 2 && text[0] == '=')
         {
-            var col = char.ToUpper(text[1]) - 'A';
-            if (!int.TryParse(text[2..], out var row))
+            var expression = new ExpressionTree(text[1..]);
+            foreach(var name in expression.GetVariableNames())
             {
-                return; 
+                if (name == null) continue;
+                var location = GetLocation(name);
+                if (location != null)
+                {
+                    var row = location.Row;
+                    var col = location.Col;
+                    if (row < 0 || row > _rowCount || col < 0 || col > _colCount) continue;
+                    var otherCell = GetCell(row, col);
+                    cell.Bind(otherCell);
+                    if (double.TryParse(otherCell.Value, out var cellValue))
+                    {
+                        expression.AddVariable(name, cellValue);
+                    }
+                    else
+                    {
+                        expression.AddVariable(name, null);
+                    }
+                }
             }
-            if (row > 0 && row < _rowCount && col >= 0 && col < _colCount)
+
+            try
             {
-                var otherCell = GetCell(row - 1, col);
-                nextValue = otherCell.Value;
-                cell.Bind(otherCell);
+                nextValue = expression.Solve().ToString(CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+                nextValue = "#error!";
             }
         }
         cell.SetValue(nextValue);

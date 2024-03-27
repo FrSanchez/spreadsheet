@@ -29,8 +29,13 @@ public class ShuntingYardTest : IVariableSolver
         Console.WriteLine();
     }
 
-    public double Resolve(string? variable)
+    public double? Resolve(string? variable)
     {
         throw new NotImplementedException();
+    }
+
+    public void AddVariable(string variable)
+    { 
+        
     }
 }

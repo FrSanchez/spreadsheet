@@ -24,12 +24,12 @@ public class ExpressionTree
         Parse();
     }
 
-    public void AddVariable(string? variable, double value)
+    public void AddVariable(string? variable, double? value)
     {
         _solver.AddVariable(variable, value);
     }
 
-    public double GetVariable(string? variable)
+    public double? GetVariable(string? variable)
     {
         return _solver.GetVariable(variable);
     }
@@ -37,6 +37,11 @@ public class ExpressionTree
     public IEnumerable<string?> GetVariableNames()
     {
         return _solver.GetVariableNames();
+    }
+
+    public void SetVariableValue(string name, double value)
+    {
+        _solver.AddVariable(name, value);
     }
 
     public double Solve()

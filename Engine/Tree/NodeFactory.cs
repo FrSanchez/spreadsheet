@@ -43,6 +43,12 @@ public class NodeFactory
         }
 
         var match = Regex.Match(contents, "^[a-zA-Z]+[a-zA-Z0-9]*$");
-        return match.Success ? new VariableNode(contents, _solver) : null;
+        if (match.Success)
+        {
+            var node = new VariableNode(contents, _solver);
+            _solver.AddVariable(contents);
+            return node;
+        }
+        return null;
     }
 }

@@ -46,7 +46,7 @@ internal sealed class SpreadSheetCell : Cell
         }
     }
 
-    public sealed override string Text
+    public override string Text
     {
         get => base.Text;
         set
