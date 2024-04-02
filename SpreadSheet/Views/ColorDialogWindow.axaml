@@ -9,18 +9,19 @@
         WindowStartupLocation="CenterOwner"
         Title="ColorDialog"
         x:DataType="vm:ColorDialogViewModel">
-    <StackPanel Margin="20">
-        <ColorView Color="Aquamarine"></ColorView>
-        <Button 
-            Margin="12" 
-            Command="{Binding OnOkCommand}"
-            CommandParameter="Ok"
-        />
-        <Button 
-            Margin="12" 
-            Command="{Binding OnCancelCommand}"
-            CommandParameter="Ok"
-        />
-        
-    </StackPanel>
+    <Panel>
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top">
+                <ColorView Color="{Binding Color}"></ColorView>
+            </StackPanel>
+            <Panel Margin="40" DockPanel.Dock="Bottom">
+            <Button Content="Ok"
+                    Command="{Binding OkColor}"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <!-- <Button Content="Cancel"  -->
+            <!--         Command="{Binding CancelColor}" -->
+            <!--         HorizontalAlignment="Right" VerticalAlignment="Center"/> -->
+            </Panel>
+        </DockPanel>
+    </Panel>
 </Window>

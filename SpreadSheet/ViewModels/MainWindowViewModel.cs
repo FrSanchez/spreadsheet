@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Avalonia.Media;
 using ReactiveUI;
 
 namespace SpreadSheet.ViewModels;
@@ -19,7 +20,7 @@ public class MainWindowViewModel : ViewModelBase
     private const int RowCount = 50;
     private const int ColumnCount = 'Z' - 'A' + 1;
     
-    public Interaction<ColorDialogViewModel, ColorDialogViewModel?> ShowDialog { get; }
+    public Interaction<ColorDialogViewModel, ColorChangeViewModel?> ShowDialog { get; }
     public ICommand SelectColorCommand { get; }
     
     private readonly Random _rand = new ();
@@ -86,7 +87,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        ShowDialog = new Interaction<ColorDialogViewModel, ColorDialogViewModel?>();
+        ShowDialog = new Interaction<ColorDialogViewModel, ColorChangeViewModel?>();
         BgColor = 0xFF000000;
         Spreadsheet = [];
         _spreadsheet = new SpreadSheet(RowCount, ColumnCount);
@@ -102,9 +103,13 @@ public class MainWindowViewModel : ViewModelBase
         }
         SelectColorCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            var store = new ColorDialogViewModel();
+            var colorChooser = new ColorDialogViewModel(Colors.Chartreuse);
 
-            var result = await ShowDialog.Handle(store);
+            var result = await ShowDialog.Handle(colorChooser);
+            if (result != null)
+            {
+                Console.WriteLine("Change color" + result.Color);
+            }
         });
     }
 }

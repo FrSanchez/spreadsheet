@@ -28,14 +28,29 @@
 
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Open..."/>
                     <Separator/>
-                    <MenuItem Header="_Exit" Click="MenuItem_OnExit"/>
+                    <MenuItem Header="_Exit" Click="MenuItem_OnExit">
+                        <MenuItem.Icon>
+                            <PathIcon Data="{StaticResource pane_close_regular}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Edit">
-                    <MenuItem Header="SetColor" Command="{Binding SelectColorCommand}" />
-                    <MenuItem Header="Undo" Click="MenuITem_OnUndo"/>
-                    <MenuItem Header="Redo" Click="MenuITem_OnRedo"/>
+                    <MenuItem Header="Set_Color" Command="{Binding SelectColorCommand}">
+                        <MenuItem.Icon>
+                            <PathIcon Data="{StaticResource color_regular}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="_Undo" Click="MenuITem_OnUndo">
+                        <MenuItem.Icon>
+                            <PathIcon Data="{StaticResource arrow_undo_regular}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="_Redo" Click="MenuITem_OnRedo">
+                        <MenuItem.Icon>
+                            <PathIcon Data="{StaticResource arrow_redo_regular}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
             

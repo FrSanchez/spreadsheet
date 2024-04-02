@@ -109,14 +109,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     }
     
     private async Task DoShowDialogAsync(InteractionContext<ColorDialogViewModel,
-        ColorDialogViewModel?> interaction)
+        ColorChangeViewModel?> interaction)
     {
         var dialog = new ColorDialogWindow
         {
             DataContext = interaction.Input
         };
 
-        var result = await dialog.ShowDialog<ColorDialogViewModel?>(this);
+        var result = await dialog.ShowDialog<ColorChangeViewModel?>(this);
         interaction.SetOutput(result);
     }
 }
