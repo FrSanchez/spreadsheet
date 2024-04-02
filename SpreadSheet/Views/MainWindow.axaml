@@ -3,13 +3,19 @@
         xmlns:vm="using:SpreadSheet.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:engine="using:Engine"
+        xmlns:local="clr-namespace:SpreadSheet.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SpreadSheet.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
+        WindowStartupLocation="CenterScreen"
         Title="SpreadSheet">
 
+ 
+    <Window.Resources>
+        <local:ColorConverter x:Key="ColorConverter"/>
+    </Window.Resources>
+    
     <Design.DataContext>
        <!-- This only sets the DataContext for the previewer in an IDE,
             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -20,6 +26,19 @@
         <DockPanel LastChildFill="True" 
                    DockPanel.Dock="Top">
 
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Open..."/>
+                    <Separator/>
+                    <MenuItem Header="_Exit" Click="MenuItem_OnExit"/>
+                </MenuItem>
+                <MenuItem Header="_Edit">
+                    <MenuItem Header="SetColor" Command="{Binding SelectColorCommand}" />
+                    <MenuItem Header="Undo" Click="MenuITem_OnUndo"/>
+                    <MenuItem Header="Redo" Click="MenuITem_OnRedo"/>
+                </MenuItem>
+            </Menu>
+            
             <Button 
                 Name="Demo1Click" 
                 Content="Demo HWS" 
@@ -70,6 +89,8 @@
                     <Setter Property="BorderThickness" Value="0,0,1,1" />
                     <Setter Property="BorderBrush" Value="#33000000" />
                     <Setter Property="IsEnabled" Value="True"></Setter>
+                    <Setter Property="Background" Value="{Binding BgColor, 
+                            Converter={StaticResource ColorConverter}}"></Setter>
                 </Style>
                 <Style Selector="DataGridRow">
                     <Setter Property="Background" Value="Gray"/>

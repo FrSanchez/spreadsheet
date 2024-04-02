@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Windows.Input;
+using ReactiveUI;
 
 namespace SpreadSheet.ViewModels;
 
@@ -10,18 +13,21 @@ public class MainWindowViewModel : ViewModelBase
 {
     // public ObservableCollection<IEnumerable<Cell>> Spreadsheet { get; }
     public List<List<Cell>> Spreadsheet { get;  }
-    private SpreadSheet _spreadsheet;
+
+    private readonly SpreadSheet _spreadsheet;
 
     private const int RowCount = 50;
     private const int ColumnCount = 'Z' - 'A' + 1;
-
+    
+    public Interaction<ColorDialogViewModel, ColorDialogViewModel?> ShowDialog { get; }
+    public ICommand SelectColorCommand { get; }
     
     private readonly Random _rand = new ();
     public void DoDemoBonus(object msg)
     {
-        for (int row = 0; row < RowCount; row++)
+        for (var row = 0; row < RowCount; row++)
         {
-            for(int col = 0; col < ColumnCount; col++)
+            for(var col = 0; col < ColumnCount; col++)
             {
                 if (row % 3 == 1 && col % 2 == 0)
                 {
@@ -40,7 +46,7 @@ public class MainWindowViewModel : ViewModelBase
         _spreadsheet[row, col].Text = value;
     }
     
-    private int nextRandom()
+    private int NextRandom()
     {
         int rndRow = _rand.Next(0, RowCount);
         int rndCol = _rand.Next(2, ColumnCount);
@@ -52,23 +58,20 @@ public class MainWindowViewModel : ViewModelBase
         HashSet<int> randomCells = new();
         while (randomCells.Count < 50)
         {
-            randomCells.Add(nextRandom());
+            randomCells.Add(NextRandom());
         }
 
         int randomText = 0;
-        for (int row = 0; row < RowCount; row++)
+        for (var row = 0; row < RowCount; row++)
         {
-            for(int col = 0; col < ColumnCount; col++)
+            for(var col = 0; col < ColumnCount; col++)
             {
-                _spreadsheet[row, col].Text = string.Empty;
-                if (col == 0)
+                _spreadsheet[row, col].Text = col switch
                 {
-                    _spreadsheet[row, col].Text = $"=B{row + 1}";
-                }
-                if (col == 1)
-                {
-                    _spreadsheet[row, col].Text = $"This is cell B{(row + 1):d2}";
-                }
+                    0 => $"=B{row + 1}",
+                    1 => $"This is cell B{(row + 1):d2}",
+                    _ => string.Empty
+                };
 
                 int val = (row * ColumnCount) + col;
                 if (randomCells.Contains(val))
@@ -78,10 +81,14 @@ public class MainWindowViewModel : ViewModelBase
             }
         }
     }
+    
+    public uint BgColor { get; set; }
 
     public MainWindowViewModel()
     {
-        Spreadsheet = new();
+        ShowDialog = new Interaction<ColorDialogViewModel, ColorDialogViewModel?>();
+        BgColor = 0xFF000000;
+        Spreadsheet = [];
         _spreadsheet = new SpreadSheet(RowCount, ColumnCount);
         foreach (var rowIndex in Enumerable.Range(0, RowCount))
         {
@@ -93,5 +100,11 @@ public class MainWindowViewModel : ViewModelBase
 
             Spreadsheet.Add(columns);
         }
+        SelectColorCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            var store = new ColorDialogViewModel();
+
+            var result = await ShowDialog.Handle(store);
+        });
     }
 }

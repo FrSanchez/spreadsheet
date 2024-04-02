@@ -1,9 +1,10 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Engine;
 
-public class SpreadSheet : INotifyPropertyChanged
+public partial class SpreadSheet : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -69,10 +70,10 @@ public class SpreadSheet : INotifyPropertyChanged
 
     private void InitializeData()
     {
-        for (int r = 0; r < _rowCount; r++)
+        for (var r = 0; r < _rowCount; r++)
         {
             var row = new List<SpreadSheetCell>();
-            for (int c = 0; c < _colCount; c++)
+            for (var c = 0; c < _colCount; c++)
             {
                 var cell = new SpreadSheetCell(r,c);
                 cell.PropertyChanged += OnCellChanged;
@@ -118,8 +119,24 @@ public class SpreadSheet : INotifyPropertyChanged
     {
         var text = cell.Text;
         var nextValue = text;
-        if (text == cell.Value) return;
-        if (text != string.Empty && text.Length >= 2 && text[0] == '=')
+        if (text == cell.Value || string.IsNullOrEmpty(text)) return;
+        
+        var match = SingleCellFormula().Match(text);
+        if (match.Success)
+        {
+            // a single variable is set, no need to use the expression tree
+            var loc = GetLocation(text[1..]);
+            if (loc == null)
+            {
+                return;
+            }
+            if (loc.Row < 0 || loc.Row > _rowCount || loc.Col < 0 || loc.Col > _colCount) return;
+            var otherCell = GetCell(loc.Row, loc.Col);
+            cell.Bind(otherCell);
+            cell.SetValue(otherCell.Value);
+            return;
+        }
+        if (text is ['=', _, ..])
         {
             var expression = new ExpressionTree(text[1..]);
             foreach(var name in expression.GetVariableNames())
@@ -166,4 +183,7 @@ public class SpreadSheet : INotifyPropertyChanged
             PreUpdateValue(cell);
         }
     }
+
+    [GeneratedRegex("=[A-Z][0-9]{1,2}", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex SingleCellFormula();
 }

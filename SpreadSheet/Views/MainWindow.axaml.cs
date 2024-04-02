@@ -1,9 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
 using Engine;
+using ReactiveUI;
 using SpreadSheet.ViewModels;
 
 namespace SpreadSheet.Views;
@@ -26,16 +30,19 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             MainGrid.Columns.Add(col);
         }
 
-        MainGrid.LoadingRow += MainGridOnLoadingRow;
+        MainGrid.LoadingRow += (sender, args) =>
+        {
+            var row = args.Row;
+            row.Header = (row.GetIndex() + 1).ToString();
+            // row.Background = (row.GetIndex() % 2 == 0)
+            //     ? new SolidColorBrush(0xffe0e0e0)
+            //     : new SolidColorBrush(0xffd0d0d0);
+        };
+        
+        this.WhenActivated(action => 
+            action(ViewModel!.ShowDialog.RegisterHandler(DoShowDialogAsync)));
     }
-
-    private void MainGridOnLoadingRow(object? sender, DataGridRowEventArgs e)
-    {
-        var row = e.Row;
-        row.Header = (row.GetIndex() + 1).ToString();
-        row.Background = (row.GetIndex() % 2 == 0) ? new SolidColorBrush(0xffe0e0e0) : new SolidColorBrush(0xffd0d0d0);
-    }
-
+    
     private void MainGrid_OnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
     {
         var vm = ViewModel;
@@ -84,5 +91,32 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 vm.SetCellText(row,col.Value,block.Text);
             }
         }
+    }
+
+    private void MenuItem_OnExit(object? sender, RoutedEventArgs e)
+    {
+        this.Close();
+    }
+
+    private void MenuITem_OnUndo(object? sender, RoutedEventArgs e)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    private void MenuITem_OnRedo(object? sender, RoutedEventArgs e)
+    {
+        throw new System.NotImplementedException();
+    }
+    
+    private async Task DoShowDialogAsync(InteractionContext<ColorDialogViewModel,
+        ColorDialogViewModel?> interaction)
+    {
+        var dialog = new ColorDialogWindow
+        {
+            DataContext = interaction.Input
+        };
+
+        var result = await dialog.ShowDialog<ColorDialogViewModel?>(this);
+        interaction.SetOutput(result);
     }
 }
