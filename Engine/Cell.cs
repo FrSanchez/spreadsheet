@@ -28,8 +28,8 @@ public abstract class Cell(int row, int col) : INotifyPropertyChanged
 
     public string Value => _value;
 
-    private int Row { get; } = row;
-    private int Col { get;  } = col;
+    public int Row { get; } = row;
+    public int Col { get;  } = col;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

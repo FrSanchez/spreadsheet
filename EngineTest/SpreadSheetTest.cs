@@ -10,20 +10,20 @@ public class SpreadSheetTest
     }
 
     [Test]
-    public void TestContructorError1()
+    public void TestConstructorError1()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
         {
-            new SpreadSheet(0, 1);
+            var spreadSheet = new SpreadSheet(0, 1);
         });
     }    
     
     [Test]
-    public void TestContructorError2()
+    public void TestConstructorError2()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
         {
-            new SpreadSheet(1, 0);
+            var spreadSheet = new SpreadSheet(1, 0);
         });
     }
 
@@ -31,18 +31,18 @@ public class SpreadSheetTest
     public void TestSetCell()
     {
         var ss = new SpreadSheet(3, 3);
-        ss.SetCell(0, 0, "hello");
-        var cell = ss[0, 0];
+        ss.SetCellText(0, 0, "hello");
+        var cell = ss.GetCell(0, 0);
         Assert.NotNull(cell);
-        Assert.That("hello", Is.EqualTo(cell.Text));
-        Assert.That("hello", Is.EqualTo(cell.Value));
+        Assert.That(cell.Text, Is.EqualTo("hello"));
+        Assert.That(cell.Value, Is.EqualTo("hello"));
     }
 
     [Test]
     public void TestRange()
     {
         var ss = new SpreadSheet(4, 4);
-        ss.SetCell(1,1,"hello");
+        ss.SetCellText(1,1,"hello");
         for (int r = 0; r < 4; r++)
         {
             for (int c = 0; c < 4; c++)
@@ -62,8 +62,8 @@ public class SpreadSheetTest
     public void TestFormulaBasic1()
     {
         var ss = new SpreadSheet(2, 2);
-        ss.SetCell(0,0, "hello");
-        ss.SetCell(0,1,"=A1");
+        ss.SetCellText(0,0, "hello");
+        ss.SetCellText(0,1,"=A1");
         Assert.Multiple(() =>
         {
             Assert.That(ss.GetCell(0, 1).Text, Is.EqualTo("=A1"));
@@ -76,9 +76,9 @@ public class SpreadSheetTest
     public void TestFormulaBasic2()
     {
         var ss = new SpreadSheet(2, 2);
-        ss.SetCell(0,0, "hello");
-        ss.SetCell(0,1,"=A1");
-        ss.SetCell(0,0,"world");
+        ss.SetCellText(0,0, "hello");
+        ss.SetCellText(0,1,"=A1");
+        ss.SetCellText(0,0,"world");
         Assert.That(ss.GetCell(0,1).Value, Is.EqualTo("world"));
     }
 
@@ -92,12 +92,12 @@ public class SpreadSheetTest
             {
                 if (r > 0 || c > 0)
                 {
-                    ss.SetCell(r, c, "=A1");
+                    ss.SetCellText(r, c, "=A1");
                 }
             }
         }
 
-        ss.SetCell(0, 0, "hello");
+        ss.SetCellText(0, 0, "hello");
         for (int r = 0; r < 5; r++)
         {
             for (int c = 0; c < 5; c++)
@@ -127,17 +127,17 @@ public class SpreadSheetTest
                         prevC = cols - 1;
                     }
 
-                    ss.SetCell(r, c, $"={((char)(prevC + 'A')).ToString()}{prevR}");
+                    ss.SetCellText(r, c, $"={((char)(prevC + 'A')).ToString()}{prevR}");
                 }
             }
         }
 
-        ss.SetCell(0,0,"hello");
-        for (int r = 0; r < rows; r++)
+        ss.SetCellText(0,0,"hello");
+        for (var r = 0; r < rows; r++)
         {
-            for (int c = 0; c < cols; c++)
+            for (var c = 0; c < cols; c++)
             {
-                Assert.That(ss[r,c].Value, Is.EqualTo("hello"));
+                Assert.That(ss.GetCell(r,c).Value, Is.EqualTo("hello"));
             }
         }
     }
@@ -146,7 +146,7 @@ public class SpreadSheetTest
     public void TestReadCellInvalid(int row, int col)
     {
         var ss = new SpreadSheet(3, 3);
-        Assert.Throws<ArgumentOutOfRangeException>(() => { ss.SetCell(row, col, "hello"); });
+        Assert.Throws<ArgumentOutOfRangeException>(() => { ss.SetCellText(row, col, "hello"); });
     }
 
     private static IEnumerable<int[]> GetTestData()

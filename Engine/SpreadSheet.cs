@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Engine.Utils;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Engine;
 
@@ -11,22 +13,20 @@ public partial class SpreadSheet : INotifyPropertyChanged
     private readonly int _rowCount;
     private readonly int _colCount;
     private readonly List<List<SpreadSheetCell>>_cells;
+    private readonly Stack<IOperation> _undoStack;
+    private readonly Stack<IOperation> _redoStack;
     
     public SpreadSheet(int rowCount, int colCount)
     {
-        if (rowCount < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(rowCount));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(rowCount, 1);
 
-        if (colCount < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(colCount));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan(colCount, 1);
         _rowCount = rowCount;
         _colCount = colCount;
         _cells = new();
         InitializeData();
+        _undoStack = new Stack<IOperation>();
+        _redoStack = new Stack<IOperation>();
     }
 
     private void ValidateRowAndCol(int row, int col)
@@ -53,20 +53,52 @@ public partial class SpreadSheet : INotifyPropertyChanged
         return _cells[row][col];
     }
 
-    public void SetCell(int row, int col, string value)
+    public void SetCellText(int row, int col, string value)
     {
         ValidateRowAndCol(row, col);
+        _undoStack.Push(new ChangeTextOperation(_cells[row][col]));
         _cells[row][col].Text = value;
+    }
+
+    public int GetUndoSize()
+    {
+        return _undoStack.Count;
+    }
+
+    public int GetRedoSize()
+    {
+        return _redoStack.Count;
+    }
+
+    public void Undo()
+    {
+        if (_undoStack.Count <= 0) return;
+        var operation = _undoStack.Pop();
+        Console.WriteLine(">>UNDO: [" + operation + "]");
+        if (operation is ChangeTextOperation textOperation)
+        {
+            _redoStack.Push(new ChangeTextOperation(textOperation.GetCell));
+        }
+        operation.Apply();
+    }
+
+    public void Redo()
+    {
+        if (_redoStack.Count <= 0) return;
+        var operation = _redoStack.Pop();
+        Console.WriteLine("<<REDO: [" + operation + "]");
+        if (operation is ChangeTextOperation textOperation)
+        {
+            _undoStack.Push(new ChangeTextOperation(textOperation.GetCell));
+        }
+
+        operation.Apply();
     }
 
     public IEnumerable<IEnumerable<Cell>> GetRows()
     {
         return _cells;
     }
-
-    public IEnumerable<Cell> this[int row] => GetRow(row);
-
-    public Cell this[int row, int col] => GetCell(row, col);
 
     private void InitializeData()
     {
@@ -87,12 +119,21 @@ public partial class SpreadSheet : INotifyPropertyChanged
     private void PreUpdateValue(SpreadSheetCell cell)
     {
         var text = cell.Text;
-        if (text.Length <= 2 || text[0] != '=') return;
-        var col = char.ToUpper(text[1]) - 'A';
-        if (!int.TryParse(text.AsSpan(2), out var row)) return;
-        if (row <= 0 || row >= _rowCount || col < 0 || col >= _colCount) return;
-        var otherCell = GetCell(row - 1, col);
-        cell.UnBind(otherCell);
+        if (text == cell.Value || string.IsNullOrEmpty(text)) return;
+        if (text is ['=', _, ..])
+        {
+            var expression = new ExpressionTree(text[1..]);
+            foreach (var name in expression.GetVariableNames())
+            {
+                if (name == null) continue;
+                var loc = GetLocation(name);
+                if (loc == null) continue;
+
+                if (loc.Row < 0 || loc.Row > _rowCount || loc.Col < 0 || loc.Col > _colCount) continue;
+                var otherCell = GetCell(loc.Row, loc.Col);
+                cell.UnBind(otherCell);
+            }
+        }
     }
 
     private static Pair? GetLocation(string variable)
@@ -115,12 +156,13 @@ public partial class SpreadSheet : INotifyPropertyChanged
         return null;
     }
 
+
     private void UpdateValue(SpreadSheetCell cell)
     {
         var text = cell.Text;
         var nextValue = text;
         if (text == cell.Value || string.IsNullOrEmpty(text)) return;
-        
+
         var match = SingleCellFormula().Match(text);
         if (match.Success)
         {
@@ -130,22 +172,24 @@ public partial class SpreadSheet : INotifyPropertyChanged
             {
                 return;
             }
+
             if (loc.Row < 0 || loc.Row > _rowCount || loc.Col < 0 || loc.Col > _colCount) return;
             var otherCell = GetCell(loc.Row, loc.Col);
             cell.Bind(otherCell);
             cell.SetValue(otherCell.Value);
             return;
         }
+
         if (text is ['=', _, ..])
         {
             var expression = new ExpressionTree(text[1..]);
-            foreach(var name in expression.GetVariableNames())
+            foreach (var name in expression.GetVariableNames())
             {
                 if (name == null) continue;
                 expression.AddVariable(name, null);
                 var loc = GetLocation(name);
                 if (loc == null) continue;
-                
+
                 if (loc.Row < 0 || loc.Row > _rowCount || loc.Col < 0 || loc.Col > _colCount) continue;
                 var otherCell = GetCell(loc.Row, loc.Col);
                 cell.Bind(otherCell);
@@ -167,6 +211,7 @@ public partial class SpreadSheet : INotifyPropertyChanged
         }
         cell.SetValue(nextValue);
     }
+
     private void OnCellChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (sender is SpreadSheetCell cell && args.PropertyName == "Text")
@@ -184,6 +229,37 @@ public partial class SpreadSheet : INotifyPropertyChanged
         }
     }
 
-    [GeneratedRegex("=[A-Z][0-9]{1,2}", RegexOptions.IgnoreCase, "en-US")]
+    public void SaveFile(Stream stream)
+    {
+        using var streamWriter = new StreamWriter(stream);
+        foreach (var cell in _cells)
+        {
+            var line = string.Join(",", cell.Select(c => c.Text).ToArray());
+            streamWriter.WriteLineAsync(line);
+        }
+    }
+
+    public void ReadFile(Stream stream)
+    {
+        using var parser = new TextFieldParser(stream);
+        parser.TextFieldType = FieldType.Delimited;
+        parser.SetDelimiters(",");
+        var row = 0;
+        while (!parser.EndOfData)
+        {
+            var fields = parser.ReadFields();
+            if (fields == null) continue;
+            var col = 0;
+            foreach (var field in fields)
+            {
+                _cells[row][col++].Text = field;
+            }
+
+            row++;
+        }
+
+    }
+
+    [GeneratedRegex("^=[A-Z][0-9]{1,2}$", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex SingleCellFormula();
 }

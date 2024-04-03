@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using ReactiveUI;
 
 namespace SpreadSheet.ViewModels;
@@ -12,31 +15,34 @@ using Engine;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    // public ObservableCollection<IEnumerable<Cell>> Spreadsheet { get; }
-    public List<List<Cell>> Spreadsheet { get;  }
+    public List<List<Cell>> Spreadsheet { get; }
 
     private readonly SpreadSheet _spreadsheet;
 
     private const int RowCount = 50;
     private const int ColumnCount = 'Z' - 'A' + 1;
-    
+
     public Interaction<ColorDialogViewModel, ColorChangeViewModel?> ShowDialog { get; }
     public ICommand SelectColorCommand { get; }
-    
-    private readonly Random _rand = new ();
+    public ICommand UndoCommand { get; }
+    public ICommand RedoCommand { get; }
+
+    private readonly Random _rand = new();
+
     public void DoDemoBonus(object msg)
     {
         for (var row = 0; row < RowCount; row++)
         {
-            for(var col = 0; col < ColumnCount; col++)
+            for (var col = 0; col < ColumnCount; col++)
             {
                 if (row % 3 == 1 && col % 2 == 0)
                 {
-                    _spreadsheet[row, col].Text = $"={(char)(col + 'A')}{row}";
+                    _spreadsheet.SetCellText(row, col, $"={(char)(col + 'A')}{row}");
                 }
+
                 if (row % 3 == 0)
                 {
-                    _spreadsheet[row, col].Text = $"{_rand.Next(0xFFFF):x4}";
+                    _spreadsheet.SetCellText(row, col, $"{_rand.Next(0xFFFF):x4}");
                 }
             }
         }
@@ -44,16 +50,16 @@ public class MainWindowViewModel : ViewModelBase
 
     public void SetCellText(int row, int col, string value)
     {
-        _spreadsheet[row, col].Text = value;
+        _spreadsheet.SetCellText(row, col, value);
     }
-    
+
     private int NextRandom()
     {
         int rndRow = _rand.Next(0, RowCount);
         int rndCol = _rand.Next(2, ColumnCount);
         return (rndRow * ColumnCount) + rndCol;
     }
-    
+
     public void DoDemoHw(object msg)
     {
         HashSet<int> randomCells = new();
@@ -65,25 +71,28 @@ public class MainWindowViewModel : ViewModelBase
         int randomText = 0;
         for (var row = 0; row < RowCount; row++)
         {
-            for(var col = 0; col < ColumnCount; col++)
+            for (var col = 0; col < ColumnCount; col++)
             {
-                _spreadsheet[row, col].Text = col switch
+                _spreadsheet.SetCellText(row, col, col switch
                 {
                     0 => $"=B{row + 1}",
                     1 => $"This is cell B{(row + 1):d2}",
                     _ => string.Empty
-                };
+                });
 
                 int val = (row * ColumnCount) + col;
                 if (randomCells.Contains(val))
                 {
-                    _spreadsheet[row, col].Text = $"Rando {++randomText}";
+                    _spreadsheet.SetCellText(row, col, $"Rando {++randomText}");
                 }
             }
         }
     }
-    
-    public uint BgColor { get; set; }
+
+    private uint BgColor { get; set; }
+    public int UndoStackSize => _spreadsheet.GetUndoSize();
+
+    public int RedoStackSize => _spreadsheet.GetRedoSize();
 
     public MainWindowViewModel()
     {
@@ -101,15 +110,33 @@ public class MainWindowViewModel : ViewModelBase
 
             Spreadsheet.Add(columns);
         }
+
         SelectColorCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            var colorChooser = new ColorDialogViewModel(Colors.Chartreuse);
+            var colorChooser = new ColorDialogViewModel(Color.FromUInt32(BgColor));
 
             var result = await ShowDialog.Handle(colorChooser);
             if (result != null)
             {
+                BgColor = result.Color.ToUInt32();
                 Console.WriteLine("Change color" + result.Color);
             }
         });
+
+        UndoCommand = ReactiveCommand.Create(() => { _spreadsheet.Undo(); });
+
+        RedoCommand = ReactiveCommand.Create(() => { _spreadsheet.Redo(); });
+    }
+
+    public async Task SaveAsync(IStorageFile file)
+    {
+        await using var stream = await file.OpenWriteAsync();
+        _spreadsheet.SaveFile(stream);
+    }
+
+    public async Task ReadAsync(IStorageFile file)
+    {
+        await using var stream = await file.OpenReadAsync();
+        _spreadsheet.ReadFile(stream);
     }
 }
