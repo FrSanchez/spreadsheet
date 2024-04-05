@@ -11,4 +11,10 @@ public class MyFilePickerFileTypes
         MimeTypes = new[] { "text/csv" }
     };
 
+    public static FilePickerFileType Xml { get; } = new("Xml File")
+    {
+        Patterns = new[] { "*.xml" },
+        AppleUniformTypeIdentifiers = new[] { "public.xml-text" },
+        MimeTypes = new[] { "text/xml" }
+    };
 }

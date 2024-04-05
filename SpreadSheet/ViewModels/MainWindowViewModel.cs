@@ -5,9 +5,12 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Xml.Serialization;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
+using SpreadSheet.Models;
 
 namespace SpreadSheet.ViewModels;
 
@@ -130,13 +133,39 @@ public class MainWindowViewModel : ViewModelBase
 
     public async Task SaveAsync(IStorageFile file)
     {
+        var output = new SpreadsheetData();
+        foreach (var cells in Spreadsheet)
+        {
+            var row = new RowData();
+            row.AddRange(cells.Select(cell => new CellData(cell)).ToList());
+            output.Add(row);
+        }
+        var serializer = new XmlSerializer(output.GetType());
         await using var stream = await file.OpenWriteAsync();
-        _spreadsheet.SaveFile(stream);
+        await using var writer = new StreamWriter(stream);
+        serializer.Serialize(writer, output);
     }
 
     public async Task ReadAsync(IStorageFile file)
     {
+        var input = new SpreadsheetData();
+        var serializer = new XmlSerializer(input.GetType());
         await using var stream = await file.OpenReadAsync();
-        _spreadsheet.ReadFile(stream);
+        using var reader = new StreamReader(stream);
+        input = (SpreadsheetData)serializer.Deserialize(reader)!;
+        var row = 0;
+        foreach (var cells in input)
+        {
+            var col = 0;
+            foreach (var cell in cells)
+            {
+                Spreadsheet[row][col].Text = cell.Text;
+                Spreadsheet[row][col].BackgroundColor = cell.BackgroundColor;
+                col++;
+            }
+
+            row++;
+        }
+        // _spreadsheet.ReadFile(stream);
     }
 }

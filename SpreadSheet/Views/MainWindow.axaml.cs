@@ -131,7 +131,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var file = await topLevel?.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = "Save Spreadsheet File",
-            FileTypeChoices = new []{ MyFilePickerFileTypes.Csv }
+            FileTypeChoices = new []{ MyFilePickerFileTypes.Xml }
         })!;
 
         if (file is not null)
@@ -149,7 +149,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var files = await topLevel?.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open Spreadsheet File",
-            FileTypeFilter = new[] { MyFilePickerFileTypes.Csv },
+            FileTypeFilter = new[] { MyFilePickerFileTypes.Xml },
             AllowMultiple = false
         })!;
 

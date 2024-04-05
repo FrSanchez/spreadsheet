@@ -231,13 +231,13 @@ public partial class SpreadSheet : INotifyPropertyChanged
 
     public void SaveFile(Stream stream)
     {
-        using var streamWriter = new StreamWriter(stream);
-        foreach (var cell in _cells)
-        {
-            var line = string.Join(",", cell.Select(c => c.Text).ToArray());
-            streamWriter.WriteLineAsync(line);
-        }
-    }
+    //     using var streamWriter = new StreamWriter(stream);
+    //     foreach (var cell in _cells)
+    //     {
+    //         var line = string.Join(",", cell.Select(c => c.Text).ToArray());
+    //         streamWriter.WriteLineAsync(line);
+    //     }
+     }
 
     public void ReadFile(Stream stream)
     {

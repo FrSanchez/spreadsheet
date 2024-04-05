@@ -21,6 +21,19 @@ public abstract class Cell(int row, int col) : INotifyPropertyChanged
         }
     }
 
+    private uint _color = 0xffffffff;
+
+    public virtual uint BackgroundColor
+    {
+        get => _color;
+        set
+        {
+            if (_color.Equals(value)) return;
+            _color = value;
+            OnPropertyChanged();
+        }
+    }
+
     public override string ToString()
     {
         return $"({Row},{Col})[{Text}][{Value}]";
