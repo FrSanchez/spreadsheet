@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml.Serialization;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
@@ -19,6 +18,7 @@ using Engine;
 public class MainWindowViewModel : ViewModelBase
 {
     public List<List<Cell>> Spreadsheet { get; }
+    public string? Filename { get; set; }
 
     private readonly SpreadSheet _spreadsheet;
 
@@ -100,6 +100,7 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         ShowDialog = new Interaction<ColorDialogViewModel, ColorChangeViewModel?>();
+        Filename = null;
         BgColor = 0xFF000000;
         Spreadsheet = [];
         _spreadsheet = new SpreadSheet(RowCount, ColumnCount);
@@ -133,6 +134,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public async Task SaveAsync(IStorageFile file)
     {
+        Filename = file.Name;
         var output = new SpreadsheetData();
         foreach (var cells in Spreadsheet)
         {
@@ -148,6 +150,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public async Task ReadAsync(IStorageFile file)
     {
+        Filename = file.Name;
         var input = new SpreadsheetData();
         var serializer = new XmlSerializer(input.GetType());
         await using var stream = await file.OpenReadAsync();
@@ -167,5 +170,16 @@ public class MainWindowViewModel : ViewModelBase
             row++;
         }
         // _spreadsheet.ReadFile(stream);
+    }
+
+    public void CloseSpreadsheet()
+    {
+        for (var row = 0; row < RowCount; row++)
+        {
+            for (var col = 0; col < ColumnCount; col++)
+            {
+                _spreadsheet.SetCellText(row, col, string.Empty);
+            }
+        }
     }
 }

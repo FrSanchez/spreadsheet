@@ -21,11 +21,10 @@ internal sealed class SpreadSheetCell : Cell
 
     public void SetValue(string value)
     {
-        if (value != _value)
-        {
-            _value = value;
-            OnPropertyChanged(nameof(Value));
-        }
+        Console.WriteLine($"VALUE->{Row},{Col}={value}");
+        if (value == _value) return;
+        _value = value;
+        OnPropertyChanged(nameof(Value));
     }
 
     public void Bind(Cell other)
@@ -52,6 +51,7 @@ internal sealed class SpreadSheetCell : Cell
         set
         {
             OnPropertyChanging();
+            Console.WriteLine($"TEXT->{Row},{Col}={value}");
             base.Text = value;
         }
     }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -16,6 +15,7 @@ namespace SpreadSheet.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
+    
     public MainWindow()
     {
         InitializeComponent();
@@ -32,7 +32,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             MainGrid.Columns.Add(col);
         }
 
-        MainGrid.LoadingRow += (sender, args) =>
+        MainGrid.LoadingRow += (_, args) =>
         {
             var row = args.Row;
             row.Header = (row.GetIndex() + 1).ToString();
@@ -59,7 +59,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     }
 
     
-    private void MainGrid_OnCurrentCellChanged(object? sender, EventArgs e)
+    private void MainGrid_OnCurrentCellChanged(object? sender, EventArgs _)
     {
         if (sender is not DataGrid grid) return;
         if (grid.SelectedItem is not List<Cell> item) return;
@@ -99,15 +99,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 vm.SetCellText(row,col.Value,block.Text);
             }
         }
-        // vm?.UpdateBars();
-        UndoBar.Value = (double)vm?.UndoStackSize!;
-        RedoBar.Value = (double)vm?.RedoStackSize!;
-        
+       
     }
 
-    private void MenuItem_OnExit(object? sender, RoutedEventArgs e)
+    private void MenuItem_OnExit(object? _, RoutedEventArgs routedEventArgs)
     {
-        this.Close();
+        Close();
     }
     
     private async Task DoShowDialogAsync(InteractionContext<ColorDialogViewModel,
@@ -124,6 +121,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
     private async void SaveFileButton_Clicked(object sender, RoutedEventArgs args)
     {
+        var button = sender as MenuItem;
+        var suggested = ViewModel?.Filename;
+        if (button?.Name == "SaveAs")
+        {
+            suggested = string.Empty;
+        }
         // Get top level from the current control. Alternatively, you can use Window reference instead.
         var topLevel = GetTopLevel(this);
 
@@ -131,16 +134,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var file = await topLevel?.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = "Save Spreadsheet File",
-            FileTypeChoices = new []{ MyFilePickerFileTypes.Xml }
+            FileTypeChoices = new []{ MyFilePickerFileTypes.Xml },
+            SuggestedFileName = suggested
         })!;
 
         if (file is not null)
         {
             ViewModel?.SaveAsync(file);
         }
+        
     }
     
-    private async void OpenFileButton_Clicked(object sender, RoutedEventArgs args)
+    private async void OpenFileButton_Clicked(object _, RoutedEventArgs args)
     {
         // Get top level from the current control. Alternatively, you can use Window reference instead.
         var topLevel = GetTopLevel(this);
@@ -156,6 +161,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         if (files.Count >= 1)
         {
             ViewModel?.ReadAsync(files[0]);
+            SaveAs.IsVisible = true;
         }
+    }
+
+    private void CloseButton_Clicked(object? sender, RoutedEventArgs e)
+    {
+        ViewModel?.CloseSpreadsheet();
     }
 }
